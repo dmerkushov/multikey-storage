@@ -1,0 +1,18 @@
+###
+POST http://localhost:8080/testing/tag1,tag2
+Content-Type: application/xml; charset=UTF-8
+
+<myXml>
+    <someOne/>
+</myXml>
+
+###
+POST http://localhost:8080/testing/tag1,tag3
+Content-Type: application/xml; charset=UTF-8
+
+<myXml>
+    <someOther/>
+</myXml>
+
+###
+GET http://localhost:8080/testing/tag1,tag2
