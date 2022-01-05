@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.6.2</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>ru.dmerkushov</groupId>
+    <artifactId>multikey-cache</artifactId>
+    <version>1.0.0.initial-${username}-${timestamp}</version>
+
+    <properties>
+        <app.javaversion>11</app.javaversion>
+        <app.mainclass>ru.dmerkushov.mkcache.Main</app.mainclass>
+        <app.listen.port.incontainer>8080</app.listen.port.incontainer>
+        <app.listen.port.exposed>8080</app.listen.port.exposed>
+        <app.docker.localregistry>localhost:5000</app.docker.localregistry>
+
+        <username>${user.name}</username>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+
+        <depversion.log4j>2.17.1</depversion.log4j>
+        <depversion.lombok>1.18.22</depversion.lombok>
+
+        <maven.compiler.source>${app.javaversion}</maven.compiler.source>
+        <maven.compiler.target>${app.javaversion}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+
+        <!-- Spring Boot - application engine -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Log4j 2 - logging engine -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${depversion.log4j}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${depversion.log4j}</version>
+        </dependency>
+
+        <!-- Lombok - code sugar -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${depversion.lombok}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Micrometer - metrics collecting -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.38.1</version>
+                <executions>
+                    <execution>
+                        <id>Build docker container</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <!--                    <execution>-->
+                    <!--                        <id>Push docker container</id>-->
+                    <!--                        <phase>deploy</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>push</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
+                </executions>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>${project.artifactId}</name>
+                            <registry>${app.docker.localregistry}</registry>
+                            <build>
+                                <from>adoptopenjdk/openjdk${app.javaversion}</from>
+                                <tags>
+                                    <tag>${project.version}</tag>
+                                </tags>
+                                <ports>
+                                    <port>${app.listen.port.incontainer}</port>
+                                </ports>
+                                <cmd>
+                                    <shell>java -cp 'jars/*' ${app.mainclass} '/config.file'</shell>
+                                </cmd>
+                                <assembly>
+                                    <basedir>/</basedir>
+                                    <inline>
+                                        <dependencySet>
+                                            <outputDirectory>jars</outputDirectory>
+                                        </dependencySet>
+                                        <files>
+                                            <file>
+                                                <source>${project.build.directory}/${project.build.finalName}.jar
+                                                </source>
+                                                <outputDirectory>jars</outputDirectory>
+                                            </file>
+                                        </files>
+                                    </inline>
+                                </assembly>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>${app.listen.port.exposed}:${app.listen.port.incontainer}</port>
+                                </ports>
+
+                                <!-- 1 GiB memory limit -->
+                                <memory>1073741824</memory>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
