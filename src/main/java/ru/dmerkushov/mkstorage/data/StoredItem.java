@@ -1,4 +1,4 @@
-package ru.dmerkushov.mkcache.data;
+package ru.dmerkushov.mkstorage.data;
 
 import java.util.Set;
 import lombok.Builder;
@@ -6,14 +6,14 @@ import lombok.Data;
 import org.springframework.http.MediaType;
 
 /**
- * An item in the cache
+ * An item in the storage
  */
 @Data
 @Builder
-public class CachedItem {
+public class StoredItem {
 
     /**
-     * Name of the configured system using the cached item
+     * Name of the configured system using the stored item
      */
     private String systemName;
 
@@ -23,17 +23,17 @@ public class CachedItem {
     private MediaType mediaType;
 
     /**
-     * Bytes to be stored in the cache
+     * Bytes to be stored
      */
     private byte[] bytes;
 
     /**
-     * Tags to be stored for a cached item
+     * Tags to point to this item in the storage
      */
     Set<String> tags;
 
     /**
-     * Timestamp of the entity encaching (as in {@link System#currentTimeMillis()}
+     * Timestamp of the item storing (as in {@link System#currentTimeMillis()}
      */
-    private long encacheTimestamp;
+    private long storeTimestamp;
 }

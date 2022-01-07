@@ -1,6 +1,6 @@
 ###
 # @name post_tag1_first
-POST http://localhost:8080/testing/tag1
+POST http://localhost:8080/v1/testing/tag1
 Content-Type: text/plain; charset=UTF-8
 
 One
@@ -16,7 +16,7 @@ client.test("body OK", function() {
 
 ###
 # @name post_tag12
-POST http://localhost:8080/testing/tag1,tag2
+POST http://localhost:8080/v1/testing/tag1,tag2
 Content-Type: text/plain; charset=UTF-8
 
 OneTwo
@@ -32,7 +32,7 @@ client.test("body OK", function() {
 
 ###
 # @name post_tag13
-POST http://localhost:8080/testing/tag1,tag3
+POST http://localhost:8080/v1/testing/tag1,tag3
 Content-Type: application/xml; charset=UTF-8
 
 <one>
@@ -50,7 +50,7 @@ client.test("body OK", function() {
 
 ### Expected: status 200, content type: "text/plain;charset=UTF-8", body: "onetwo"
 # @name get_tag12
-GET http://localhost:8080/testing/tag1,tag2
+GET http://localhost:8080/v1/testing/tag1,tag2
 
 > {%
 client.test("status 200", function() {
@@ -69,7 +69,7 @@ client.test("content type - charset UTF-8", function() {
 
 ### Expected: status 200, content type: "text/plain;charset=UTF-8", body: (the XML from the second POST request)
 # @name get_tag13
-GET http://localhost:8080/testing/tag1,tag3
+GET http://localhost:8080/v1/testing/tag1,tag3
 
 > {%
 client.test("status 200", function() {
@@ -88,7 +88,7 @@ client.test("content type - charset UTF-8", function() {
 
 ### Expected: status 409, empty body (as tag1 is not associated with a single storage item this time)
 # @name post_tag1_2
-POST http://localhost:8080/testing/tag1
+POST http://localhost:8080/v1/testing/tag1
 Content-Type: text/plain; charset=UTF-8
 
 One
@@ -104,7 +104,7 @@ client.test("body null", function() {
 
 ### Expected: status 409, empty body
 # @name get_tag1
-GET http://localhost:8080/testing/tag1
+GET http://localhost:8080/v1/testing/tag1
 
 > {%
 client.test("status 409", function() {
@@ -117,7 +117,7 @@ client.test("body null", function() {
 
 ### Expected: status 404, empty body (as tag4 is not associated with any storage item)
 # @name get_tag4
-GET http://localhost:8080/testing/tag4
+GET http://localhost:8080/v1/testing/tag4
 
 > {%
 client.test("status 404", function() {

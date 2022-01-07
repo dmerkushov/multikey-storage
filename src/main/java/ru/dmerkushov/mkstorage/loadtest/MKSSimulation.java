@@ -1,4 +1,4 @@
-package ru.dmerkushov.mkcache.loadtest;
+package ru.dmerkushov.mkstorage.loadtest;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,7 +10,7 @@ import ru.dmerkushov.loadtest.LoadSimulation;
 import ru.dmerkushov.loadtest.LoadTestActionResult;
 
 @Log4j2
-public class MKCSimulation implements LoadSimulation {
+public class MKSSimulation implements LoadSimulation {
 
     private HttpClient httpClient;
     private HttpRequest setupRequest;
@@ -19,7 +19,7 @@ public class MKCSimulation implements LoadSimulation {
     private final String uriStr = "http://localhost:8080/testing/tag1,tag2";
     private final String testXmlStr = "<myXml><someOne/></myXml>";
 
-    public MKCSimulation() {
+    public MKSSimulation() {
         try {
             httpClient = HttpClient.newHttpClient();
             setupRequest = HttpRequest.newBuilder()
@@ -70,7 +70,6 @@ public class MKCSimulation implements LoadSimulation {
             log.warn(e);
             actionResultAtomicReference.set(LoadTestActionResult.LoadTestActionStatus.FAIL);
         }
-
 
     }
 }

@@ -12,12 +12,12 @@
     </parent>
 
     <groupId>ru.dmerkushov</groupId>
-    <artifactId>multikey-cache</artifactId>
+    <artifactId>multikey-storage</artifactId>
     <version>1.0.0.initial-${username}-${timestamp}</version>
 
     <properties>
         <app.javaversion>11</app.javaversion>
-        <app.mainclass>ru.dmerkushov.mkcache.Main</app.mainclass>
+        <app.mainclass>ru.dmerkushov.mkstorage.Main</app.mainclass>
         <app.listen.port.incontainer>8080</app.listen.port.incontainer>
         <app.listen.port.exposed>8080</app.listen.port.exposed>
         <app.docker.localregistry>localhost:5000</app.docker.localregistry>

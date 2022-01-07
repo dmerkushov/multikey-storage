@@ -1,11 +1,11 @@
-package ru.dmerkushov.mkcache.loadtest;
+package ru.dmerkushov.mkstorage.loadtest;
 
 import ru.dmerkushov.loadtest.LoadTesting;
 
-public class MKCLoadTest {
+public class MKSLoadTest {
 
     public static void main(String[] args) throws Exception {
         LoadTesting loadTesting = new LoadTesting(100, 10000, 600000);
-        loadTesting.runLoadTest(MKCSimulation.class);
+        loadTesting.runLoadTest(MKSSimulation.class);
     }
 }
