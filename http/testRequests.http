@@ -1,20 +1,4 @@
-###
-# @name post_tag1_first
-POST http://localhost:8080/v1/testing/tag1
-Content-Type: text/plain; charset=UTF-8
-
-One
-
-> {%
-client.test("status 200", function() {
-    client.assert(response.status === 200, "status incorrect: " + response.status + ", expected: 200");
-});
-client.test("body OK", function() {
-    client.assert(response.body === "OK", "body incorrect: \"" + response.body + "\", expected: \"OK\"");
-});
- %}
-
-###
+### Expected: status 200, body: "OK"
 # @name post_tag12
 POST http://localhost:8080/v1/testing/tag1,tag2
 Content-Type: text/plain; charset=UTF-8
@@ -23,10 +7,10 @@ OneTwo
 
 > {%
 client.test("status 200", function() {
-    client.assert(response.status === 200, "status incorrect: " + response.status + ", expected: 200");
+    client.assert(response.status === 200, "post_tag12 status incorrect: " + response.status + ", expected: 200");
 });
 client.test("body OK", function() {
-    client.assert(response.body === "OK", "body incorrect: \"" + response.body + "\", expected: \"OK\"");
+    client.assert(response.body === "OK", "post_tag12 body incorrect: \"" + response.body + "\", expected: \"OK\"");
 });
  %}
 
@@ -41,29 +25,31 @@ Content-Type: application/xml; charset=UTF-8
 
 > {%
 client.test("status 200", function() {
-    client.assert(response.status === 200, "status incorrect: " + response.status + ", expected: 200");
+    client.assert(response.status === 200, "post_tag13 status incorrect: " + response.status + ", expected: 200");
 });
 client.test("body OK", function() {
-    client.assert(response.body === "OK", "body incorrect: \"" + response.body + "\", expected: \"OK\"");
+    client.assert(response.body === "OK", "post_tag13 body incorrect: \"" + response.body + "\", expected: \"OK\"");
 });
  %}
 
-### Expected: status 200, content type: "text/plain;charset=UTF-8", body: "onetwo"
+### Expected: status 200, content type: "text/plain;charset=UTF-8", body: "OneTwo"
 # @name get_tag12
 GET http://localhost:8080/v1/testing/tag1,tag2
 
 > {%
 client.test("status 200", function() {
-    client.assert(response.status === 200, "status incorrect: " + response.status + ", expected: 200");
+    client.assert(response.status === 200, "get_tag12 status incorrect: " + response.status + ", expected: 200");
 });
 client.test("body OneTwo", function() {
-    client.assert(response.body === "OneTwo", "body incorrect: \"" + response.body + "\", expected: \"OneTwo\"");
+    client.assert(response.body === "OneTwo", "get_tag12 body incorrect: \"" + response.body + "\", expected: \"OneTwo\"");
 });
 client.test("content type - MIME text/plain", function() {
-    client.assert(response.contentType.mimeType === "text/plain", "content type incorrect: \"" + response.contentType.mimeType + "\", expected: \"text/plain\"");
+    client.assert(response.contentType.mimeType === "text/plain", "get_tag12 content type incorrect: \"" + response.contentType.mimeType
+    + "\", expected: \"text/plain\"");
 });
 client.test("content type - charset UTF-8", function() {
-    client.assert(response.contentType.charset === "UTF-8", "content type incorrect: \"" + response.contentType.charset + "\", " + "expected: \"UTF-8\"");
+    client.assert(response.contentType.charset === "UTF-8", "get_tag12 content type incorrect: \"" + response.contentType.charset + "\", " +
+     "" + "expected: \"UTF-8\"");
 });
  %}
 
@@ -73,21 +59,24 @@ GET http://localhost:8080/v1/testing/tag1,tag3
 
 > {%
 client.test("status 200", function() {
-    client.assert(response.status === 200, "status incorrect: " + response.status + ", expected: 200");
+    client.assert(response.status === 200, "get_tag13 status incorrect: " + response.status + ", expected: 200");
 });
 client.test("body XML", function() {
-    client.assert(response.body === "<one>\n    <three/>\n</one>", "body incorrect: \"" + response.body + "\", expected: \n<one>\n    <three/>\n</one>");
+    client.assert(response.body === "<one>\n    <three/>\n</one>", "get_tag13 body incorrect: \"" + response.body + "\", expected: " +
+     "\n<one>\n    <three/>\n</one>");
 });
 client.test("content type - MIME application/xml", function() {
-    client.assert(response.contentType.mimeType === "application/xml", "content type incorrect: \"" + response.contentType.mimeType + "\", expected: \"application/xml\"");
+    client.assert(response.contentType.mimeType === "application/xml", "get_tag13 content type incorrect: \"" + response.contentType
+    .mimeType + "\", expected: \"application/xml\"");
 });
 client.test("content type - charset UTF-8", function() {
-    client.assert(response.contentType.charset === "UTF-8", "content type incorrect: \"" + response.contentType.charset + "\", " + "expected: \"UTF-8\"");
+    client.assert(response.contentType.charset === "UTF-8", "get_tag13 content type incorrect: \"" + response.contentType.charset + "\", " +
+     "" + "expected: \"UTF-8\"");
 });
  %}
 
 ### Expected: status 409, empty body (as tag1 is not associated with a single storage item this time)
-# @name post_tag1_2
+# @name post_tag1_second
 POST http://localhost:8080/v1/testing/tag1
 Content-Type: text/plain; charset=UTF-8
 
@@ -95,23 +84,85 @@ One
 
 > {%
 client.test("status 409", function() {
-    client.assert(response.status === 409, "status incorrect: " + response.status + ", expected: 409");
+    client.assert(response.status === 409, "post_tag1_second status incorrect: " + response.status + ", expected: 409");
 });
 client.test("body null", function() {
-    client.assert(response.body === null, "body incorrect: \"" + response.body + "\", expected: null");
+    client.assert(response.body === null, "post_tag1_second body incorrect: \"" + response.body + "\", expected: null");
 });
  %}
 
 ### Expected: status 409, empty body
-# @name get_tag1
+# @name get_tag1_first
 GET http://localhost:8080/v1/testing/tag1
 
 > {%
+client.test("status 409", function() {
+    client.assert(response.status === 409, "get_tag1_first status incorrect: " + response.status + ", expected: 409");
+});
+client.test("body null", function() {
+    client.assert(response.body === null, "get_tag1_first body incorrect: \"" + response.body + "\", expected: null");
+});
+ %}
+
+### Expected: status 404, empty body
+# @name delete_tag4
+DELETE http://localhost:8080/v1/testing/tag4
+
+> {%
+client.test("status 200", function() {
+    client.assert(response.status === 404, "delete_tag4 status incorrect: " + response.status + ", expected: 404");
+});
+client.test("body OK", function() {
+    client.assert(response.body === null, "delete_tag4 body incorrect: \"" + response.body + "\", expected: null");
+});
+%}
+
+### Expected: status 409, empty body
+# @name delete_tag1
+DELETE http://localhost:8080/v1/testing/tag1
+
+> {%
+client.log("delete_tag1")
 client.test("status 409", function() {
     client.assert(response.status === 409, "status incorrect: " + response.status + ", expected: 409");
 });
 client.test("body null", function() {
     client.assert(response.body === null, "body incorrect: \"" + response.body + "\", expected: null");
+});
+%}
+
+### Expected: status 200, body: "OK"
+# @name delete_tag13
+DELETE http://localhost:8080/v1/testing/tag1,tag3
+
+> {%
+client.test("status 200", function() {
+    client.assert(response.status === 200, "delete_tag13 status incorrect: " + response.status + ", expected: 200");
+});
+client.test("body OK", function() {
+    client.assert(response.body === "OK", "delete_tag13 body incorrect: \"" + response.body + "\", expected: \"OK\"");
+});
+%}
+
+### Expected: status 200, content type: "text/plain;charset=UTF-8", body: "OneTwo"
+### (because group tag1,tag3 was deleted, group tag1,tag2 remains the only one)
+# @name get_tag1_second
+GET http://localhost:8080/v1/testing/tag1
+
+> {%
+client.test("status 200", function() {
+    client.assert(response.status === 200, "get_tag1_second status incorrect: " + response.status + ", expected: 200");
+});
+client.test("body OneTwo", function() {
+    client.assert(response.body === "OneTwo", "get_tag1_second body incorrect: \"" + response.body + "\", expected: \"OneTwo\"");
+});
+client.test("content type - MIME text/plain", function() {
+    client.assert(response.contentType.mimeType === "text/plain", "get_tag1_second content type incorrect: \"" + response.contentType
+    .mimeType + "\", expected: \"text/plain\"");
+});
+client.test("content type - charset UTF-8", function() {
+    client.assert(response.contentType.charset === "UTF-8", "get_tag1_second content type incorrect: \"" + response.contentType.charset +
+     "\", " + "expected: \"UTF-8\"");
 });
  %}
 
@@ -121,9 +172,9 @@ GET http://localhost:8080/v1/testing/tag4
 
 > {%
 client.test("status 404", function() {
-    client.assert(response.status === 404, "status incorrect: " + response.status + ", expected: 409");
+    client.assert(response.status === 404, "get_tag4 status incorrect: " + response.status + ", expected: 409");
 });
 client.test("body null", function() {
-    client.assert(response.body === null, "body incorrect: \"" + response.body + "\", expected: null");
+    client.assert(response.body === null, "get_tag4 body incorrect: \"" + response.body + "\", expected: null");
 });
  %}

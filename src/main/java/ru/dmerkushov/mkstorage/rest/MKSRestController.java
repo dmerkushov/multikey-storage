@@ -1,7 +1,7 @@
 package ru.dmerkushov.mkstorage.rest;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,13 +43,13 @@ public class MKSRestController {
     /**
      * Create or update an item in the storage
      *
+     * @param requestId   ID of the request to the REST endpoint. See {@link RequestIdFilter}
      * @param systemName  system name for which to setup the storing
      * @param tagsStr     tags to store the stored item with. Separated by commas
      * @param requestId   generated/or received in {@link RequestIdFilter}
      * @param contentType content type of the item to be stored
      * @param bytes       bytes to be stored
      * @return
-     * @throws Exception
      */
     @PostMapping("/{systemName}/{tags}")
     public ResponseEntity<String> post(
@@ -105,6 +106,14 @@ public class MKSRestController {
         return ResponseEntity.ok("OK");
     }
 
+    /**
+     * Get an item from the storage
+     *
+     * @param requestId  ID of the request to the REST endpoint. See {@link RequestIdFilter}
+     * @param systemName system name for which to setup the storing
+     * @param tagsStr    tags to search the stored item with. Separated by commas
+     * @return
+     */
     @GetMapping("/{systemName}/{tags}")
     public ResponseEntity<byte[]> get(
             @RequestAttribute("requestId") String requestId,
@@ -134,7 +143,7 @@ public class MKSRestController {
             return ResponseEntity.internalServerError().build();
         }
         if (storedItem == null) {
-            log.info("-get(): requestId {}: Unexpected null result from storage backend", requestId);
+            log.error("-get(): requestId {}: Unexpected null result from storage backend", requestId);
             return ResponseEntity.internalServerError().build();
         }
 
@@ -151,14 +160,65 @@ public class MKSRestController {
         return responseEntity;
     }
 
+    /**
+     * Delete an item in the storage
+     *
+     * @param requestId  ID of the request to the REST endpoint. See {@link RequestIdFilter}
+     * @param systemName system name for which to setup the storing
+     * @param tagsStr    tags to search the stored item with. Separated by commas
+     * @return
+     */
+    @DeleteMapping("/{systemName}/{tags}")
+    public ResponseEntity<String> delete(
+            @RequestAttribute("requestId") String requestId,
+            @PathVariable("systemName") String systemName,
+            @PathVariable("tags") String tagsStr
+    ) {
+        log.debug(
+                "+delete(): requestId {}: try to get stored data for systemName {}, tagsStr \"{}\"",
+                requestId,
+                systemName,
+                tagsStr
+        );
+
+        Set<String> tags = parseTags(requestId, tagsStr);
+
+        StoredItem storedItem;
+        try {
+            storedItem = storageBackend.remove(requestId, systemName, tags);
+        } catch (MultipleFoundInStorageException e) {
+            log.warn("-delete(): requestId " + requestId + ": Multiple values found in the storage for the given tags", e);
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();  // status 409
+        } catch (NotFoundInStorageException e) {
+            log.warn("-delete(): requestId " + requestId + ": No values found in the storage for the given tags", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // status 404
+        } catch (StorageBackendException e) {
+            log.error("-delete(): requestId " + requestId + ": Unexpected storage backend error", e);
+            return ResponseEntity.internalServerError().build();
+        }
+        if (storedItem == null) {
+            log.error("-delete(): requestId {}: Unexpected null result from storage backend", requestId);
+            return ResponseEntity.internalServerError().build();
+        }
+
+        log.debug(
+                "-delete(): requestId {}: OK",
+                requestId
+        );
+        return ResponseEntity.ok("OK");
+    }
+
     private Set<String> parseTags(String requestId, String tagsStr) {
         log.trace("+parseTags(): requestId {}: tagsStr {}", requestId, tagsStr);
 
         Set<String> tags = Arrays.stream(
-                tagsStr.split(",")
-        ).collect(
-                Collectors.toCollection(() -> new HashSet<>())
-        );
+                        tagsStr.split(",")
+                )
+                .map(String::trim)
+                .sorted()
+                .collect(
+                        Collectors.toCollection(() -> new LinkedHashSet<>())
+                );
 
         log.trace("-parseTags(): requestId {}: tags {}", requestId, tags);
         return tags;

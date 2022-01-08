@@ -43,6 +43,8 @@ public class MemMapStorageBackend implements StorageBackend {
     private final Counter errorNotFoundCounterStore;
     private final Counter errorMultipleFoundCounterGet;
     private final Counter errorNotFoundCounterGet;
+    private final Counter errorMultipleFoundCounterRemove;
+    private final Counter errorNotFoundCounterRemove;
 
     @Override
     public StoredItem store(String requestId, StoredItem newStoredItem) throws StorageBackendException {
@@ -55,7 +57,7 @@ public class MemMapStorageBackend implements StorageBackend {
                 uuid = getSingleUuidForTags(requestId, newStoredItem.getTags());
             } catch (MultipleFoundInStorageException e) {
                 log.error(
-                        "store(): requestId " + requestId +
+                        "-store(): requestId " + requestId +
                                 ": multiple existing uuids found when searching for tags of: " + newStoredItem + ". " +
                                 "The resulting stored item will become inaccessible. Cancelling the storing action",
                         e
@@ -116,7 +118,7 @@ public class MemMapStorageBackend implements StorageBackend {
                 uuid = getSingleUuidForTags(requestId, tags);
             } catch (MultipleFoundInStorageException e) {
                 log.error(
-                        "store(): requestId " + requestId +
+                        "-get(): requestId " + requestId +
                                 ": multiple existing uuids found when searching for tags: " +
                                 tags.stream().collect(Collectors.joining(",")) + ". " +
                                 "The stored item being searched for is inaccessible",
@@ -128,7 +130,7 @@ public class MemMapStorageBackend implements StorageBackend {
 
                 throw e;
             } catch (NotFoundInStorageException e) {
-                log.trace("store(): requestId {}: no existing uuids found for tags of the new stored item", requestId);
+                log.debug("-get(): requestId {}: no existing uuids found for tags of the new stored item", requestId);
 
                 // Metrics
                 errorNotFoundCounterGet.increment();
@@ -138,8 +140,7 @@ public class MemMapStorageBackend implements StorageBackend {
 
             // This shouldn't happen, but it's always better to test the null case
             if (uuid == null) {
-
-                log.error("get(): requestId {}: Unexpected: uuid is null for tags {}", requestId, tags);
+                log.error("-get(): requestId {}: Unexpected: uuid is null for tags {}", requestId, tags);
 
                 throw new StorageBackendException(
                         "get(): requestId " + requestId + ": " +
@@ -156,6 +157,77 @@ public class MemMapStorageBackend implements StorageBackend {
             }
         } finally {
             lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public StoredItem remove(String requestId, String systemName, Set<String> tags) throws StorageBackendException {
+        log.debug("+remove(): requestId {}, systemName {}, tags {}", requestId, systemName, tags);
+
+        lock.writeLock().lock();
+        try {
+            UUID uuid = null;
+            try {
+                uuid = getSingleUuidForTags(requestId, tags);
+            } catch (MultipleFoundInStorageException e) {
+                log.error(
+                        "-remove(): requestId " + requestId +
+                                ": multiple existing uuids found when searching for tags: " +
+                                tags.stream().collect(Collectors.joining(",")) + ". " +
+                                "The stored item being searched for is inaccessible",
+                        e
+                );
+
+                // Metrics
+                errorMultipleFoundCounterRemove.increment();
+
+                throw e;
+            } catch (NotFoundInStorageException e) {
+                log.trace("-remove(): requestId {}: no existing uuids found for tags of the new stored item", requestId);
+
+                // Metrics
+                errorNotFoundCounterRemove.increment();
+
+                throw e;
+            }
+
+            // This shouldn't happen, but it's always better to test the null case
+            if (uuid == null) {
+                log.error("-remove(): requestId {}: Unexpected: uuid is null for tags {}", requestId, tags);
+
+                throw new StorageBackendException(
+                        "remove(): requestId " + requestId + ": " +
+                                "Unexpected: uuid is null for tags " +
+                                tags.stream().collect(Collectors.joining(","))
+                );
+            }
+
+            for (String tag : tags) {
+                Set<UUID> uuids = tagsToUuids.get(tag);
+                if (uuids != null) {
+                    uuids.remove(uuid);
+                    tagsToUuids.put(tag, uuids);
+                }
+            }
+
+            StoredItem oldStoredItem = uuidsToItems.remove(uuid);
+
+            // Update the metrics
+            if (oldStoredItem != null) {
+                memMapStorageMetrics.getTotalBytesSize().addAndGet(-oldStoredItem.getBytes().length);
+                AtomicInteger storageTotalItemQuantity = memMapStorageMetrics.getTotalItemQuantity();
+                storageTotalItemQuantity.decrementAndGet();
+            }
+
+            if (oldStoredItem != null && oldStoredItem.getSystemName().equals(systemName)) {
+                log.debug("-remove(): requestId {}: old stored item {}", requestId, oldStoredItem);
+                return oldStoredItem;
+            } else {
+                log.debug("-remove(): requestId {}: return null", requestId);
+                return null;
+            }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
