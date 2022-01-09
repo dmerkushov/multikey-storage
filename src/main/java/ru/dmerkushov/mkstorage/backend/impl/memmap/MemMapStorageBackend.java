@@ -83,7 +83,7 @@ public class MemMapStorageBackend implements StorageBackend {
             for (String tag : newStoredItem.getTags()) {
                 Set<UUID> uuids = tagsToUuids.get(tag);
                 if (uuids == null) {
-                    uuids = new HashSet<UUID>();
+                    uuids = new HashSet<>();
                 }
                 uuids.add(uuid);
                 tagsToUuids.put(tag, uuids);
@@ -97,7 +97,8 @@ public class MemMapStorageBackend implements StorageBackend {
                 AtomicInteger storageTotalItemQuantity = memMapStorageMetrics.getTotalItemQuantity();
                 storageTotalItemQuantity.incrementAndGet();
             } else {
-                memMapStorageMetrics.getTotalBytesSize().addAndGet(newStoredItem.getBytes().length - oldStoredItem.getBytes().length);
+                memMapStorageMetrics.getTotalBytesSize()
+                        .addAndGet((long) newStoredItem.getBytes().length - oldStoredItem.getBytes().length);
             }
 
             log.debug("-store(): requestId {}: old stored item {}", requestId, oldStoredItem);

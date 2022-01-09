@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 public class RequestIdFilter implements Filter {
 
-    public static final String requestIdHeaderName = "X-Request-ID";
+    public static final String REQUEST_ID_HEADER_NAME = "X-Request-ID";
 
     @Override
     public void doFilter(
@@ -41,7 +41,7 @@ public class RequestIdFilter implements Filter {
             return;
         }
 
-        String requestId = httpServletRequest.getHeader(requestIdHeaderName);
+        String requestId = httpServletRequest.getHeader(REQUEST_ID_HEADER_NAME);
         if (requestId == null) {
             requestId = UUID.randomUUID().toString();
             log.info(

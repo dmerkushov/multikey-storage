@@ -63,7 +63,6 @@ public class MKSSimulation implements LoadSimulation {
                 actionResultAtomicReference.set(LoadTestActionResult.LoadTestActionStatus.PARTIAL_2);
                 if (response.body().equals(testXmlStr)) {
                     actionResultAtomicReference.set(LoadTestActionResult.LoadTestActionStatus.SUCCESS);
-                    return;
                 }
             }
         } catch (Exception e) {

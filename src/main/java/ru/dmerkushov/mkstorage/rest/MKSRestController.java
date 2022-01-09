@@ -217,7 +217,7 @@ public class MKSRestController {
                 .map(String::trim)
                 .sorted()
                 .collect(
-                        Collectors.toCollection(() -> new LinkedHashSet<>())
+                        Collectors.toCollection(LinkedHashSet::new)
                 );
 
         log.trace("-parseTags(): requestId {}: tags {}", requestId, tags);
