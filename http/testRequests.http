@@ -172,9 +172,38 @@ GET http://localhost:8080/v1/testing/tag4
 
 > {%
 client.test("status 404", function() {
-    client.assert(response.status === 404, "get_tag4 status incorrect: " + response.status + ", expected: 409");
+    client.assert(response.status === 404, "get_tag4 status incorrect: " + response.status + ", expected: 404");
 });
 client.test("body null", function() {
     client.assert(response.body === null, "get_tag4 body incorrect: \"" + response.body + "\", expected: null");
+});
+ %}
+
+### Expected: status 409, empty body (as tag1 is not associated with a single storage item this time)
+# @name post_tag1_third
+POST http://localhost:8080/v1/testing/tag1,tag5
+Content-Type: text/plain; charset=UTF-8
+
+Five
+
+> {%
+client.test("status 200", function() {
+    client.assert(response.status === 200, "post_tag1_second status incorrect: " + response.status + ", expected: 200");
+});
+client.test("body null", function() {
+    client.assert(response.body === "OK", "post_tag1_second body incorrect: \"" + response.body + "\", expected: OK");
+});
+ %}
+
+### Expected
+# @name delete_all
+DELETE http://localhost:8080/v1/testing/tag1?force=true
+
+> {%
+client.test("status 200", function() {
+    client.assert(response.status === 200, "delete_all status incorrect: " + response.status + ", expected: 200");
+});
+client.test("body OK", function() {
+    client.assert(response.body === "OK", "delete_all body incorrect: \"" + response.body + "\", expected: OK");
 });
  %}
