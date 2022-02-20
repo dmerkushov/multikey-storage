@@ -23,7 +23,7 @@
         <app.mainclass>ru.dmerkushov.mkstorage.Main</app.mainclass>
 
         <!-- Command line parameters when running the app -->
-        <app.cmdlineparams>--mkstorage.storage.engine=dummy</app.cmdlineparams>
+        <app.cmdlineparams></app.cmdlineparams>
 
         <!-- The port that the app listens inside the container.  -->
         <app.listen.port.incontainer>8080</app.listen.port.incontainer>
