@@ -22,6 +22,9 @@
         <app.listen.port.exposed>8080</app.listen.port.exposed>
         <app.docker.localregistry>localhost:5000</app.docker.localregistry>
 
+        <!-- Memory limit in bytes - 1 GiB -->
+        <app.memory.limit>1073741824</app.memory.limit>
+
         <username>${user.name}</username>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
@@ -31,6 +34,8 @@
 
         <maven.compiler.source>${app.javaversion}</maven.compiler.source>
         <maven.compiler.target>${app.javaversion}</maven.compiler.target>
+
+
     </properties>
 
     <dependencies>
@@ -141,7 +146,7 @@
                                 </ports>
 
                                 <!-- 1 GiB memory limit -->
-                                <memory>1073741824</memory>
+                                <memory>${app.memory.limit}</memory>
                             </run>
                         </image>
                     </images>
