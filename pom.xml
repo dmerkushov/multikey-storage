@@ -16,26 +16,39 @@
     <version>1.0.0.initial-${username}-${timestamp}</version>
 
     <properties>
+        <!-- Java language version -->
         <app.javaversion>11</app.javaversion>
+
+        <!-- Main class to run -->
         <app.mainclass>ru.dmerkushov.mkstorage.Main</app.mainclass>
+
+        <!-- Command line parameters when running the app -->
+        <app.cmdlineparams></app.cmdlineparams>
+
+        <!-- The port that the app listens inside the container.  -->
         <app.listen.port.incontainer>8080</app.listen.port.incontainer>
+
+        <!-- The port that will be exposed outside the container for the application -->
         <app.listen.port.exposed>8080</app.listen.port.exposed>
+
+        <!-- Docker registry to push the artifact -->
         <app.docker.localregistry>localhost:5000</app.docker.localregistry>
 
         <!-- Memory limit in bytes - 1 GiB -->
         <app.memory.limit>1073741824</app.memory.limit>
 
-        <username>${user.name}</username>
-        <timestamp>${maven.build.timestamp}</timestamp>
-        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
-
+        <!-- Dependencies versions -->
         <depversion.log4j>2.17.1</depversion.log4j>
         <depversion.lombok>1.18.22</depversion.lombok>
 
+        <!-- Compiler properties -->
         <maven.compiler.source>${app.javaversion}</maven.compiler.source>
         <maven.compiler.target>${app.javaversion}</maven.compiler.target>
 
-
+        <!-- Auxiliary properties -->
+        <username>${user.name}</username>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -122,7 +135,7 @@
                                     <port>${app.listen.port.incontainer}</port>
                                 </ports>
                                 <cmd>
-                                    <shell>java -cp 'jars/*' ${app.mainclass} '/config.file'</shell>
+                                    <shell>java -cp 'jars/*' ${app.mainclass} ${app.cmdlineparams} '/config.file'</shell>
                                 </cmd>
                                 <assembly>
                                     <basedir>/</basedir>
