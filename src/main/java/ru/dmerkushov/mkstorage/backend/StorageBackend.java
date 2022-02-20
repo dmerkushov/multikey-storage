@@ -25,27 +25,27 @@ public interface StorageBackend {
     /**
      * Get an item from the storage associated with the given tags. The given tags group must point to a single item in the storage.
      *
-     * @param systemName
+     * @param sectionName
      * @param tags
      * @return the found item
      * @throws MultipleFoundInStorageException if there are several entities in the storage for the given tags
      * @throws NotFoundInStorageException      if no item in the storage is found for the given tags
      * @throws StorageBackendException         in case of the storing backend implementation failure
      */
-    StoredItem get(String requestId, String systemName, Set<String> tags) throws StorageBackendException;
+    StoredItem get(String requestId, String sectionName, Set<String> tags) throws StorageBackendException;
 
     /**
      * Delete an item in the storage for the given tags. The given tags group must point to a single item in the storage.
      *
      * @param requestId
-     * @param systemName
+     * @param sectionName
      * @param tags
-     * @return the deleted item
+     * @param forceMultiple Force deletion in case multiple items were found for the given tag set. All found items will be deleted
      * @throws MultipleFoundInStorageException if there are several entities in the storage for the given tags
      * @throws NotFoundInStorageException      if no item in the storage is found for the given tags
      * @throws StorageBackendException         in case of the storing backend implementation failure
      */
-    StoredItem remove(String requestId, String systemName, Set<String> tags) throws StorageBackendException;
+    void remove(String requestId, String sectionName, Set<String> tags, boolean forceMultiple) throws StorageBackendException;
 
     /**
      * Count entities found in the storage for the given tags

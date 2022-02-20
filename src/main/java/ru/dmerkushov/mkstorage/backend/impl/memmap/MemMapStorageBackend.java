@@ -20,7 +20,7 @@ import ru.dmerkushov.mkstorage.backend.StorageBackend;
 import ru.dmerkushov.mkstorage.backend.StorageBackendException;
 import ru.dmerkushov.mkstorage.data.StoredItem;
 
-@Component
+@Component("memmap")
 @Log4j2
 @RequiredArgsConstructor
 public class MemMapStorageBackend implements StorageBackend {
@@ -109,8 +109,8 @@ public class MemMapStorageBackend implements StorageBackend {
     }
 
     @Override
-    public StoredItem get(String requestId, String systemName, Set<String> tags) throws StorageBackendException {
-        log.debug("+get(): requestId {}, systemName {}, tags {}", requestId, systemName, tags);
+    public StoredItem get(String requestId, String sectionName, Set<String> tags) throws StorageBackendException {
+        log.debug("+get(): requestId {}, sectionName {}, tags {}", requestId, sectionName, tags);
 
         lock.readLock().lock();
         try {
@@ -151,7 +151,7 @@ public class MemMapStorageBackend implements StorageBackend {
             }
 
             StoredItem item = uuidsToItems.get(uuid);
-            if (item != null && item.getSystemName().equals(systemName)) {
+            if (item != null && item.getSectionName().equals(sectionName)) {
                 return item;
             } else {
                 return null;
@@ -162,27 +162,35 @@ public class MemMapStorageBackend implements StorageBackend {
     }
 
     @Override
-    public StoredItem remove(String requestId, String systemName, Set<String> tags) throws StorageBackendException {
-        log.debug("+remove(): requestId {}, systemName {}, tags {}", requestId, systemName, tags);
+    public void remove(String requestId, String sectionName, Set<String> tags, boolean forceAll) throws StorageBackendException {
+        log.debug("+remove(): requestId {}, sectionName {}, tags {}", requestId, sectionName, tags);
 
         lock.writeLock().lock();
         try {
-            UUID uuid = null;
+            Set<UUID> uuidsToDelete;
             try {
-                uuid = getSingleUuidForTags(requestId, tags);
-            } catch (MultipleFoundInStorageException e) {
-                log.error(
-                        "-remove(): requestId " + requestId +
-                                ": multiple existing uuids found when searching for tags: " +
-                                tags.stream().collect(Collectors.joining(",")) + ". " +
-                                "The stored item being searched for is inaccessible",
-                        e
-                );
+                uuidsToDelete = getUuidsForTags(requestId, tags);
+                if (!forceAll && uuidsToDelete.size() > 1) {
+                    log.error(
+                            "-remove(): requestId " + requestId +
+                                    ": multiple existing uuids found when searching for tags: " +
+                                    tags.stream().collect(Collectors.joining(",")) + ". " +
+                                    "forceAll is false. The stored item being searched for is inaccessible"
+                    );
 
-                // Metrics
-                errorMultipleFoundCounterRemove.increment();
+                    // Metrics
+                    errorMultipleFoundCounterRemove.increment();
 
-                throw e;
+                    throw new MultipleFoundInStorageException(
+                            "remove(): Multiple existing stored items (" + uuidsToDelete.size() + ") found for tags list: " +
+                                    tags.stream().collect(Collectors.joining(","))
+                    );
+                } else if (uuidsToDelete.isEmpty()) {
+                    throw new NotFoundInStorageException(
+                            "remove(): No items found in storage for tags list: " +
+                                    tags.stream().collect(Collectors.joining(","))
+                    );
+                }
             } catch (NotFoundInStorageException e) {
                 log.trace("-remove(): requestId {}: no existing uuids found for tags of the new stored item", requestId);
 
@@ -193,43 +201,45 @@ public class MemMapStorageBackend implements StorageBackend {
             }
 
             // This shouldn't happen, but it's always better to test the null case
-            if (uuid == null) {
-                log.error("-remove(): requestId {}: Unexpected: uuid is null for tags {}", requestId, tags);
+            if (uuidsToDelete == null) {
+                log.error("-remove(): requestId {}: Unexpected: uuidsToDelete is null for tags {}", requestId, tags);
 
                 throw new StorageBackendException(
                         "remove(): requestId " + requestId + ": " +
-                                "Unexpected: uuid is null for tags " +
+                                "Unexpected: uuidsToDelete is null for tags " +
                                 tags.stream().collect(Collectors.joining(","))
                 );
             }
 
-            for (String tag : tags) {
-                Set<UUID> uuids = tagsToUuids.get(tag);
-                if (uuids != null) {
-                    uuids.remove(uuid);
-                    tagsToUuids.put(tag, uuids);
+            for (UUID uuid : uuidsToDelete) {
+                for (String tag : tags) {
+                    Set<UUID> uuids = tagsToUuids.get(tag);
+                    if (uuids != null) {
+                        uuids.remove(uuid);
+                        tagsToUuids.put(tag, uuids);
+                    }
+                }
+                StoredItem oldStoredItem = uuidsToItems.remove(uuid);
+
+                // Update the metrics
+                if (oldStoredItem != null) {
+                    memMapStorageMetrics.getTotalBytesSize().addAndGet(-oldStoredItem.getBytes().length);
+                    AtomicInteger storageTotalItemQuantity = memMapStorageMetrics.getTotalItemQuantity();
+                    storageTotalItemQuantity.decrementAndGet();
+                }
+
+                if (oldStoredItem != null && oldStoredItem.getSectionName().equals(sectionName)) {
+                    log.debug("remove(): requestId {}: uuid {}: old stored item {}", requestId, uuid, oldStoredItem);
+                } else {
+                    log.debug("remove(): requestId {}: uuid {}: old stored item is null", requestId, uuid);
                 }
             }
 
-            StoredItem oldStoredItem = uuidsToItems.remove(uuid);
-
-            // Update the metrics
-            if (oldStoredItem != null) {
-                memMapStorageMetrics.getTotalBytesSize().addAndGet(-oldStoredItem.getBytes().length);
-                AtomicInteger storageTotalItemQuantity = memMapStorageMetrics.getTotalItemQuantity();
-                storageTotalItemQuantity.decrementAndGet();
-            }
-
-            if (oldStoredItem != null && oldStoredItem.getSystemName().equals(systemName)) {
-                log.debug("-remove(): requestId {}: old stored item {}", requestId, oldStoredItem);
-                return oldStoredItem;
-            } else {
-                log.debug("-remove(): requestId {}: return null", requestId);
-                return null;
-            }
         } finally {
             lock.writeLock().unlock();
         }
+
+        log.debug("-remove()");
     }
 
     @Override
@@ -253,12 +263,12 @@ public class MemMapStorageBackend implements StorageBackend {
 
         if (uuidsForTags.size() > 1) {
             throw new MultipleFoundInStorageException(
-                    "Multiple existing stored items (" + uuidsForTags.size() + ") found for tags list: " +
+                    "getSingleUuidForTags(): Multiple existing stored items (" + uuidsForTags.size() + ") found for tags list: " +
                             tags.stream().collect(Collectors.joining(","))
             );
         } else if (uuidsForTags.isEmpty()) {
             throw new NotFoundInStorageException(
-                    "No items found in storage for tags list: " +
+                    "getSingleUuidForTags(): No items found in storage for tags list: " +
                             tags.stream().collect(Collectors.joining(","))
             );
         }

@@ -3,6 +3,16 @@ logging:
     root: INFO
     ru.dmerkushov.mkstorage: INFO
 
+mkstorage:
+  storage:
+    engine: memmap
+
+server:
+  tomcat:
+    threads:
+      max: 1000
+      min: 25
+
 management:
   endpoints:
     web:

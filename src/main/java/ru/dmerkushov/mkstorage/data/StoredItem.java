@@ -13,9 +13,9 @@ import org.springframework.http.MediaType;
 public class StoredItem {
 
     /**
-     * Name of the configured system using the stored item
+     * Name of the storage section using the stored item
      */
-    private String systemName;
+    private String sectionName;
 
     /**
      * The type of the media stored
