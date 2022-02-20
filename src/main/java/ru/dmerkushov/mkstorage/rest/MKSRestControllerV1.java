@@ -177,7 +177,7 @@ public class MKSRestControllerV1 {
             @RequestAttribute("requestId") String requestId,
             @PathVariable("sectionName") String sectionName,
             @PathVariable("tags") String tagsStr,
-            @RequestParam("force") Boolean force
+            @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force
     ) {
         log.debug(
                 "+delete(): requestId {}: try to get stored data for sectionName {}, tagsStr \"{}\"",
@@ -212,7 +212,7 @@ public class MKSRestControllerV1 {
         log.trace("+parseTags(): requestId {}: tagsStr {}", requestId, tagsStr);
 
         Set<String> tags = Arrays.stream(
-                        tagsStr.split(",")
+                        Optional.ofNullable(tagsStr).orElse("").split(",")
                 )
                 .map(String::trim)
                 .sorted()
