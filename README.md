@@ -55,7 +55,7 @@ In production mode, the container may be run within a Kubernetes (https://kubern
 Run the following command within the `multikey-storage` project folder:
 
 ```bash
-$ mvn clean docker:run
+$ mvn clean package docker:run
 ```
 
 ## Usage
