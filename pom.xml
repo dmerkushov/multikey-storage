@@ -40,6 +40,8 @@
         <!-- Dependencies versions -->
         <depversion.log4j>2.17.1</depversion.log4j>
         <depversion.lombok>1.18.22</depversion.lombok>
+        <depversion.h2>1.4.200</depversion.h2>
+        <depversion.mybatis>2.2.2</depversion.mybatis>
 
         <!-- Compiler properties -->
         <maven.compiler.source>${app.javaversion}</maven.compiler.source>
@@ -96,6 +98,23 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- MyBatis - SQL database suite -->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${depversion.mybatis}</version>
+        </dependency>
+
+        <!-- TEST DEPENDENCIES -->
+
+        <!-- H2 Database - to test the SQL storage engine -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${depversion.h2}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

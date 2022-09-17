@@ -1,4 +1,4 @@
-package ru.dmerkushov.mkstorage.backend.impl.memmap;
+package ru.dmerkushov.mkstorage.backend.impl;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class MemMapStorageMetrics {
+public class RealStorageMetrics {
 
     private final MeterRegistry meterRegistry;
 
