@@ -1,10 +1,11 @@
 # multikey-storage
 
-A lightweight RESTful application to store different types of artifacts in a key-value manner, where the key is a set of so-called
-tags that identifies the value. Full CRUD support is provided.
+With this RESTful application, one can save a value with a set of symbolic tags and then retrieve it using an at least
+minimal subset of tags identifying the data element. Full CRUD support is provided.
 
 ## TOC
 
+* [An explanation](#an-explanation)
 * [Installation](#installation)
     + [Installation prerequisites](#installation-prerequisites)
         - [Java](#java)
@@ -25,6 +26,23 @@ tags that identifies the value. Full CRUD support is provided.
     + [Dummy engine](#dummy-engine)
 * [Metrics & Health check](#metrics---health-check)
 * [Contacts](#contacts)
+
+## An explanation
+
+For example, you have saved the following values in the MKS:
+
+* "ABC" with tags "A", "B" and "C"
+* "ADE" with tags "A", "D" and "E"
+* "CDE" with tags "C", "D" and "E"
+
+Given that, you may later retrieve "ABC", for instance, using the following unique tag subsets:
+
+* just **["B"]** as "B" is a tag that applies only to the "ABC" value of all values given
+* or **["A","C"]** as this pair is a pair that applies only to "ABC", too, though both "A" and "C" are tags that apply to
+  multiple values
+* or even **["A","B","C"]** - it identifies the value definitely, too, though it is not a minimal subset
+
+and later retrieve "ABC" using the
 
 ## Installation
 
