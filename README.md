@@ -5,7 +5,7 @@ minimal subset of tags identifying the data element. Full CRUD support is provid
 
 ## TOC
 
-* [An explanation](#an-explanation)
+* [An explanation of the idea](#an-explanation-of-the-idea)
 * [Installation](#installation)
     + [Installation prerequisites](#installation-prerequisites)
         - [Java](#java)
@@ -27,7 +27,7 @@ minimal subset of tags identifying the data element. Full CRUD support is provid
 * [Metrics & Health check](#metrics---health-check)
 * [Contacts](#contacts)
 
-## An explanation
+## An explanation of the idea
 
 For example, you have saved the following values in the MKS:
 
@@ -37,12 +37,11 @@ For example, you have saved the following values in the MKS:
 
 Given that, you may later retrieve "ABC", for instance, using the following unique tag subsets:
 
-* just **["B"]** as "B" is a tag that applies only to the "ABC" value of all values given
-* or **["A","C"]** as this pair is a pair that applies only to "ABC", too, though both "A" and "C" are tags that apply to
+* just **["B"]** as "B" is a tag that applies only to the "ABC" value of all the values given
+* or **["A","C"]** as this pair is the pair that applies only to "ABC", too, though both "A" and "C" are tags that apply to
   multiple values
-* or even **["A","B","C"]** - it identifies the value definitely, too, though it is not a minimal subset
-
-and later retrieve "ABC" using the
+* or **["A","B"]**, **["B","C"]**, or even **["A","B","C"]** - they all identify the value definitely, too, though they are not
+  minimal unique tag subsets
 
 ## Installation
 
