@@ -65,7 +65,7 @@ it is as simple as running:
 $ docker run -d -p 5000:5000 --restart=always --name registry registry:2
 ```
 
-In production mode, the container may be run within a [Kubernetes](https://kubernetes.io) cluster or anything similar.
+In production mode, the container may be run within a Kubernetes (https://kubernetes.io) cluster or anything similar.
 
 ### Build & run
 
@@ -210,7 +210,7 @@ For more info on log levels, see https://logging.apache.org/log4j/2.x/manual/arc
 Several storage engines are provided (see below).
 
 Engines can be selected using the property `mkstorage.storage.engine` in `application.yml`, or using the command line parameter,
-for example, `--mkstorage.storage.engine=sql`. Command line parameter takes precedence.
+for example, `--mkstorage.storage.engine=jdbc`. Command line parameter takes precedence.
 
 ### Dummy engine
 
@@ -224,12 +224,11 @@ The Dummy engine does not provide any function. Every request is "successful".
 
 The MemMap engine stores items in a couple of maps in RAM.
 
-### SQL engine (in development)
+### JDBC engine (in development)
 
-`mkstorage.storage.engine` : `sql`
+`mkstorage.storage.engine` : `jdbc`
 
-The SQL engine stores items in a JDBC-compliant relational database. The database is required to support the following SQL92
-statements:
+The JDBC engine stores items in a JDBC-compliant database. The database is required to support the following SQL92 statements:
 
 * `INSERT`
 * `SELECT`
@@ -241,7 +240,7 @@ The database is required to support simultaneous access to data.
 
 The engine is in development. Further information will be added later.
 
-### ClickHouse engine (based on SQL engine, not yet implemented)
+### ClickHouse engine (based on JDBC engine, not yet implemented)
 
 `mkstorage.storage.engine` : `clickhouse`
 

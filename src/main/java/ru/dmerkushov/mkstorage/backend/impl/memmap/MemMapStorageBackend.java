@@ -11,18 +11,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import ru.dmerkushov.mkstorage.backend.MultipleFoundInStorageException;
 import ru.dmerkushov.mkstorage.backend.NotFoundInStorageException;
+import ru.dmerkushov.mkstorage.backend.StorageBackend;
 import ru.dmerkushov.mkstorage.backend.StorageBackendException;
-import ru.dmerkushov.mkstorage.backend.impl.RealStorageBackend;
-import ru.dmerkushov.mkstorage.backend.impl.RealStorageMetrics;
 import ru.dmerkushov.mkstorage.data.StoredItem;
 
 @Component("memmap")
 @Log4j2
-public class MemMapStorageBackend extends RealStorageBackend {
+@RequiredArgsConstructor
+public class MemMapStorageBackend implements StorageBackend {
 
     /**
      * Mapping tags to UUIDs of stored items
@@ -37,25 +38,13 @@ public class MemMapStorageBackend extends RealStorageBackend {
     @Getter
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public MemMapStorageBackend(
-            RealStorageMetrics realStorageMetrics,
-            Counter errorMultipleFoundCounterStore,
-            Counter errorNotFoundCounterStore,
-            Counter errorMultipleFoundCounterGet,
-            Counter errorNotFoundCounterGet,
-            Counter errorMultipleFoundCounterRemove,
-            Counter errorNotFoundCounterRemove
-    ) {
-        super(
-                realStorageMetrics,
-                errorMultipleFoundCounterStore,
-                errorNotFoundCounterStore,
-                errorMultipleFoundCounterGet,
-                errorNotFoundCounterGet,
-                errorMultipleFoundCounterRemove,
-                errorNotFoundCounterRemove
-        );
-    }
+    private final MemMapStorageMetrics memMapStorageMetrics;
+    private final Counter errorMultipleFoundCounterStore;
+    private final Counter errorNotFoundCounterStore;
+    private final Counter errorMultipleFoundCounterGet;
+    private final Counter errorNotFoundCounterGet;
+    private final Counter errorMultipleFoundCounterRemove;
+    private final Counter errorNotFoundCounterRemove;
 
     @Override
     public StoredItem store(String requestId, StoredItem newStoredItem) throws StorageBackendException {
@@ -104,11 +93,11 @@ public class MemMapStorageBackend extends RealStorageBackend {
 
             // Update the metrics
             if (oldStoredItem == null) {
-                realStorageMetrics.getTotalBytesSize().addAndGet(newStoredItem.getBytes().length);
-                AtomicInteger storageTotalItemQuantity = realStorageMetrics.getTotalItemQuantity();
+                memMapStorageMetrics.getTotalBytesSize().addAndGet(newStoredItem.getBytes().length);
+                AtomicInteger storageTotalItemQuantity = memMapStorageMetrics.getTotalItemQuantity();
                 storageTotalItemQuantity.incrementAndGet();
             } else {
-                realStorageMetrics.getTotalBytesSize()
+                memMapStorageMetrics.getTotalBytesSize()
                         .addAndGet((long) newStoredItem.getBytes().length - oldStoredItem.getBytes().length);
             }
 
@@ -234,8 +223,8 @@ public class MemMapStorageBackend extends RealStorageBackend {
 
                 // Update the metrics
                 if (oldStoredItem != null) {
-                    realStorageMetrics.getTotalBytesSize().addAndGet(-oldStoredItem.getBytes().length);
-                    AtomicInteger storageTotalItemQuantity = realStorageMetrics.getTotalItemQuantity();
+                    memMapStorageMetrics.getTotalBytesSize().addAndGet(-oldStoredItem.getBytes().length);
+                    AtomicInteger storageTotalItemQuantity = memMapStorageMetrics.getTotalItemQuantity();
                     storageTotalItemQuantity.decrementAndGet();
                 }
 
