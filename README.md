@@ -239,7 +239,7 @@ statements:
 
 The database is required to support simultaneous access to data.
 
-The engine is in development. Further information will be added later.
+See also [the SQL engine documentation](docs/sqlEngine/index.md)
 
 ### ClickHouse engine (based on SQL engine, not yet implemented)
 

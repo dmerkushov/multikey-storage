@@ -1,0 +1,26 @@
+@startuml
+
+!include ../include/dbElements.puml
+
+table(mks_tag_tags) {
+  primary_key(tag_id, UUID)
+  --
+  column(tag_txt, VARCHAR(100))
+}
+table(mks_obj_objects) {
+  primary_key(mks_obj_id, UUID)
+  --
+  column(obj_mime, VARCHAR(200))
+  column(obj_keepuntil, TIMESTAMP WITH TIME ZONE)
+  column(obj_storage_id, VARCHAR(100))
+}
+table(mks_lnk_links_obj_tag) {
+  primary_key(lnk_id, UUID)
+  --
+  foreign_key(lnk_tag_id, UUID)
+  foreign_key(lnk_obj_id, UUID)
+}
+
+mks_tag_tags ||--|{ mks_lnk_links_obj_tag
+mks_obj_objects ||--|{ mks_lnk_links_obj_tag
+@enduml

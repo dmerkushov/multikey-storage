@@ -1,0 +1,31 @@
+@startuml
+
+!include use_smetana.puml
+
+sprite $dbField [16x16/16] {
+  0000000000000000
+  0000000000000000
+  0000000000000000
+  0000000000000000
+  0000000000000000
+  000FFFFFFFFFF000
+  000F00000000F000
+  000F00000000F000
+  000F00000000F000
+  000FFFFFFFFFF000
+  0000000000000000
+  0000000000000000
+  0000000000000000
+  0000000000000000
+  0000000000000000
+}
+
+/'
+    Define standard DB diagram symbols
+'/
+!define primary_key(x,t) <b><color:#b8861b><&key></color> x: t</b> <<PK>>
+!define foreign_key(x,t) <color:#aaaaaa><&key></color> x: t <<FK>>
+!define column(x,t) <color:#000000><$dbField></color> x: t
+!define table(x) entity x << (T, white) >>
+
+@enduml
